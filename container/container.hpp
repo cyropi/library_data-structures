@@ -10,8 +10,6 @@ namespace lasd
 {
 	class Container 
 	{
-		private:
-
 		protected:
 			ulong size = 0;
 
@@ -31,20 +29,19 @@ namespace lasd
 
 
 			// Comparison operators
-			Container& operator==(const Container&) const noexcept = delete;
-			Container& operator!=(const Container&) const noexcept = delete;
+            bool operator==(const Container&) const noexcept = delete;
+            bool operator!=(const Container&) const noexcept = delete;
 
  
 			// Specific member functions
 			virtual bool Empty() const noexcept
 			{
-				return size == 0 ? true 
-								 : false;
+                return this->size == 0;
 			};
 		
 			virtual ulong Size() const noexcept
 			{
-				return size;
+				return this->size;
 			};
 		};
 
@@ -53,10 +50,6 @@ namespace lasd
 
 		class ClearableContainer : virtual public Container
 		{
-			private:
-
-			protected:
-
 			public:
 				// Destructor
 				virtual ~ClearableContainer() = default;
@@ -69,8 +62,8 @@ namespace lasd
 
 
 				// Comparison operators
-				ClearableContainer& operator==(const ClearableContainer&) const noexcept = delete;
-				ClearableContainer& operator!=(const ClearableContainer&) const noexcept = delete;
+                bool operator==(const ClearableContainer&) const noexcept = delete;
+                bool operator!=(const ClearableContainer&) const noexcept = delete;
 
 
 				// Specific member functions
@@ -82,10 +75,6 @@ namespace lasd
 
 		class ResizableContainer : virtual public ClearableContainer
 		{			
-			private:
-
-			protected:
-
 			public:
 				// Destructor
 				virtual ~ResizableContainer() = default;
@@ -98,8 +87,8 @@ namespace lasd
 
 
 				// Comparison operators
-				ResizableContainer& operator==(const ResizableContainer&) const noexcept = delete;
-				ResizableContainer& operator!=(const ResizableContainer&) const noexcept = delete;
+                bool operator==(const ResizableContainer&) const noexcept = delete;
+                bool operator!=(const ResizableContainer&) const noexcept = delete;
 
 
 				// Specific member functions
@@ -109,7 +98,7 @@ namespace lasd
 				// Specific member function (inherited from ClearableContainer)
 				void Clear() override
 				{
-					Resize(0);
+					this->Resize(0);
 				};
 		};
 }
