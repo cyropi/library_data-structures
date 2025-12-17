@@ -1,5 +1,4 @@
 
-
 #include <stdexcept>
 
 
@@ -19,7 +18,6 @@ namespace lasd
 	}
 
 
-
 	template <typename Data>
 	bool DictionaryContainer<Data>::InsertAll(MappableContainer<Data>&& mappableContainer)
 	{
@@ -30,7 +28,6 @@ namespace lasd
 											insertedAll = false; });
 		return insertedAll;
 	}
-
 
 
 	template <typename Data>
@@ -45,7 +42,6 @@ namespace lasd
 	}
 
 
-
 	template <typename Data>
 	bool DictionaryContainer<Data>::InsertSome(const TraversableContainer<Data>& traversableContainer)
 	{
@@ -56,7 +52,6 @@ namespace lasd
 													insertedSome = true; });
 		return insertedSome;
 	}
-
 
 
 	template <typename Data>
@@ -71,7 +66,6 @@ namespace lasd
 	}
 
 
-
 	template <typename Data>
 	bool DictionaryContainer<Data>::RemoveSome(const TraversableContainer<Data>& traversableContainer)
 	{
@@ -82,6 +76,7 @@ namespace lasd
 													removedSome = true; });
 		return removedSome;
 	}
+
 
 
 
@@ -101,8 +96,7 @@ namespace lasd
 			std::cerr << "Exception occurred in OrderedDictionaryContainer (RemoveMin): " << e.what() << '\n';
 			throw e;
 		}
-	}
-
+    }
 
 
 	template <typename Data>
@@ -116,9 +110,9 @@ namespace lasd
 			minValue = min;
 			this->Remove(min);
 		}
-		catch(const std::length_error& e)
+        catch(const std::length_error& e)
 		{
-			std::cerr << "Exception occurred in OrderedDictionaryContainer (MinNRemove): " << e.what() << '\n';
+            std::cerr << "Exception occurred in OrderedDictionaryContainer (MinNRemove): " << e.what() << '\n';
 			throw e;
 		}
 
@@ -206,11 +200,11 @@ namespace lasd
 
 
 	template <typename Data>
-	void OrderedDictionaryContainer<Data>::RemoveSuccessor(const Data& data)
+    void OrderedDictionaryContainer<Data>::RemoveSuccessor(const Data& data) noexcept(false)
 	{
 		try
 		{
-			const Data& successor = this->Successor(data);
+            const Data& successor = this->Successor(data);
 			this->Remove(successor);
 		}
 		catch(const std::length_error& e)
@@ -223,13 +217,13 @@ namespace lasd
 
 
 	template <typename Data>
-	Data OrderedDictionaryContainer<Data>::SuccessorNRemove(const Data& data)
+    Data OrderedDictionaryContainer<Data>::SuccessorNRemove(const Data& data) noexcept(false)
 	{
 		Data successorValue;
 
 		try
 		{
-			const Data& successor = this->Successor(data);
+            const Data& successor = this->Successor(data);
 			successorValue = successor;
 			this->Remove(successor);
 		}
@@ -242,3 +236,4 @@ namespace lasd
 		return successorValue;
 	}
 }
+
