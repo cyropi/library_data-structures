@@ -1,5 +1,4 @@
 
-
 #ifndef DICTIONARY_HPP
 #define DICTIONARY_HPP
 
@@ -12,10 +11,6 @@ namespace lasd
     template <typename Data>
     class DictionaryContainer : virtual public TestableContainer<Data>
     {   
-        private:
-
-        protected:
-
         public:
             // Destructor
             virtual ~DictionaryContainer() = default;
@@ -48,13 +43,10 @@ namespace lasd
 
 
 
+
     template <typename Data>
     class OrderedDictionaryContainer : virtual public DictionaryContainer<Data>
     {
-        private:
-
-        protected:
-
         public:
             // Destructor
             virtual ~OrderedDictionaryContainer() = default;
