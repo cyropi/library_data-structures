@@ -10,10 +10,6 @@ namespace lasd
 	template <typename Data>
 	class TestableContainer : virtual public Container
 	{
-		private:
-		
-		protected:
-
 		public:
 			// Destructor
 			virtual ~TestableContainer() = default;
