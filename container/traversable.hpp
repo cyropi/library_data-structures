@@ -11,13 +11,11 @@ namespace lasd
 	template <typename Data>
 	class TraversableContainer : virtual public TestableContainer<Data> 
 	{
-		private:
-
-		protected:
+        protected: using Container::size;
 
 		public:
 			// Destructor
-			virtual ~TraversableContainer() = default;
+            virtual ~TraversableContainer() = default;
 
 
 			// Copy assignment
@@ -27,8 +25,8 @@ namespace lasd
 
 
 			// Comparison operators
-			bool operator==(TraversableContainer&) const noexcept = delete; 
-			bool operator!=(TraversableContainer&) const noexcept = delete; 
+            bool operator==(const TraversableContainer&) const noexcept = delete;
+            bool operator!=(const TraversableContainer&) const noexcept = delete;
 
 
 			// Specific member function
@@ -47,13 +45,10 @@ namespace lasd
 
 
 
+
 	template <typename Data>
 	class PreOrderTraversableContainer : virtual public TraversableContainer<Data>
 	{
-		private:
-
-		protected:
-
 		public:
 			// Destructor
 			virtual ~PreOrderTraversableContainer() = default;
@@ -71,11 +66,11 @@ namespace lasd
 
 
 			// Specific member function
-			using typename TraversableContainer<Data>::TraverseFun;
+            using typename TraversableContainer<Data>::TraverseFun;
 			virtual void PreOrderTraverse(TraverseFun) const = 0;
 
 			template <typename Accumulator>
-			using FoldFun = typename TraversableContainer<Data>::FoldFun<Accumulator>;
+            using FoldFun = typename TraversableContainer<Data>::template FoldFun<Accumulator>;
 			template <typename Accumulator>
 			Accumulator PreOrderFold(FoldFun<Accumulator>, Accumulator) const;
 
@@ -86,13 +81,10 @@ namespace lasd
 
 
 
+
 	template <typename Data>
 	class PostOrderTraversableContainer : virtual public TraversableContainer<Data>
 	{
-		private:
-
-		protected:
-
 		public:
 			// Destructor
 			virtual ~PostOrderTraversableContainer() = default;
@@ -114,7 +106,7 @@ namespace lasd
 			virtual void PostOrderTraverse(TraverseFun) const = 0;
 
 			template <typename Accumulator>
-			using FoldFun = typename TraversableContainer<Data>::FoldFun<Accumulator>;
+            using FoldFun = typename TraversableContainer<Data>::template FoldFun<Accumulator>;
 			template <typename Accumulator>
 			Accumulator PostOrderFold(FoldFun<Accumulator>, Accumulator) const;
 
