@@ -11,8 +11,6 @@ namespace lasd
 	template <typename Data>
 	class TraversableContainer : virtual public TestableContainer<Data> 
 	{
-        protected: using Container::size;
-
 		public:
 			// Destructor
             virtual ~TraversableContainer() = default;
