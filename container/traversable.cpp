@@ -1,7 +1,4 @@
 
-//#include "traversable.hpp"
-
-
 namespace lasd 
 {    
     // TraversableContainer
@@ -30,6 +27,7 @@ namespace lasd
 
 
 
+
     // PreOrderTraversableContainer
 
     template <typename Data>
@@ -48,6 +46,7 @@ namespace lasd
     {
         this->PreOrderTraverse(traverseFun);
     }
+
 
 
 
