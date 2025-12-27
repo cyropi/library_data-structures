@@ -1,5 +1,4 @@
 
-
 #ifndef LIST_HPP
 #define LIST_HPP
 
@@ -9,14 +8,10 @@
 namespace lasd 
 {
 	template <typename Data>
-	class List : virtual public MutableLinearContainer<Data>,
-				 virtual public ClearableContainer
+	class List : virtual public ClearableContainer,
+				 virtual public MutableLinearContainer<Data>
 	{
-		private:
-
 		protected:
-			// using Container::???;
-
 			struct Node 
 			{
 				// Data
@@ -24,6 +19,7 @@ namespace lasd
 				struct Node* next = nullptr;
 
 				
+				// Default constructors
 				Node() = default;
 
 
@@ -33,7 +29,7 @@ namespace lasd
 
 
 				// Copy constructor
-				Node(const Node&); 
+                Node(const Node&); // TODO: rimuovere, o utilizzarli per richiamare i costruttori che accettano Data come param.
 				// Move constructor
 				Node(Node&&) noexcept; 
 
@@ -63,7 +59,6 @@ namespace lasd
 
 			// Copy constructor
 			List(const List<Data>&); 
-
 			// Move constructor
 			List(List<Data>&&) noexcept; 
 
@@ -74,7 +69,6 @@ namespace lasd
 
 			// Copy assignment
 			List<Data>& operator=(const List<Data>&); 
-
 			// Move assignment
 			List<Data>& operator=(List<Data>&&) noexcept; 
 
@@ -130,18 +124,12 @@ namespace lasd
 			void PostOrderTraverse(TraverseFun) const override; // Override PostOrderTraversableContainer member
 
 
+
+            // TODO: implementare Exists
+
+
 			// Specific member function (inherited from ClearableContainer)
 			void Clear() override; // Override ClearableContainer member
-
-
-		protected:
-			// Auxiliary functions, if necessary!
-/* 			void PreOrderTraverse(TraverseFun,Node *) const;
- 			void PostOrderTraverse(TraverseFun, Node *) const;
-
-  			void PreOrderMap(MapFun,Node *);
-  			void PostOrderMap(MapFun,Node *); */
-
 	};
 }
 
