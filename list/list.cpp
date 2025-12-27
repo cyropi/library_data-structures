@@ -1,4 +1,5 @@
 
+#include <stdexcept>
 
 
 namespace lasd 
@@ -30,13 +31,6 @@ namespace lasd
         std::swap(this->value, node.value);
         std::swap(this->next, node.next);
     }
-
-
-/*     template <typename Data>
-    List<Data>::Node::~Node() 
-    {
-        //delete this->next;
-    } */
 
 
     template <typename Data>
@@ -72,19 +66,19 @@ namespace lasd
     template <typename Data>
     List<Data>::List(const List<Data>& list)
     {
-	    if( list.Size() == 0 )
+	    if(list.Empty())
 		    return;
             
-        this->size = list.Size();
+        this->size = list.size;
         this->head = new Node(*(list.head));
         this->tail = this->head;
 
-	    Node* cursor = list.head->next;
-	    while( cursor != nullptr )
+	    Node* current = list.head->next;
+        while(current != nullptr)
         {
-            this->tail->next = new Node(*cursor);
+            this->tail->next = new Node(*current);
             this->tail = this->tail->next; 
-            cursor = cursor->next;
+            current = current->next;
         }
     }
 
@@ -97,22 +91,6 @@ namespace lasd
         std::swap(this->tail, list.tail);  
     }
     
-
-/* template <typename Data>
-List<Data>& List<Data>::operator=(const List<Data>& other) {
-    if (this != &other)
-    {
-        Clear();
-        Node * cur = other.head;
-        while (cur != nullptr)
-        {
-            InsertAtBack(cur->data);
-            cur = cur->next;
-        }
-    }
-    return *this; 
-    } */
-
 
     template <typename Data>
     List<Data>& List<Data>::operator=(const List<Data>& list)
@@ -138,12 +116,6 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     template <typename Data>
     List<Data>::~List() 
     {
-/*         delete this->head;
-        //delete this->tail;
-
-        this->head = this->tail = nullptr;
-        this->size = 0; */
-
         this->Clear();
     }
 
@@ -151,7 +123,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     template <typename Data>
     bool List<Data>::operator==(const List<Data>& list) const noexcept
     {
-        if(this->size != list.Size())
+        if(this->size != list.size)
             return false;
         
         Node* thisCurrent = this->head;
@@ -207,7 +179,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     void List<Data>::RemoveFromFront() noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile rimuovere l'elemento in testa...");
+            throw std::length_error("List is empty! It wasn't possible to remove the first element...");
 
         Node* headToRemove = this->head;
         this->head = this->head->next;
@@ -222,33 +194,20 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     template <typename Data>
     Data List<Data>::FrontNRemove() noexcept(false)
     {
-        Data d;
+        Data frontValue;
 
         try
         {
-           d = this->Front();
-           this->RemoveFromFront();
+			frontValue = this->Front();
+            this->RemoveFromFront();
         }
-        catch(const std::exception& e)
+        catch(const std::length_error& e)
         {
+            std::cerr << "Exception occurred in List (FrontNRemove): " << e.what() << '\n';
             throw;
         }
         
-        return d;
-
-/*         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile rimuovere l'elemento in testa...");
-
-        Node* headToRemove = this->head;
-        this->head = this->head->next;
-        Data removedHeadValue = headToRemove->value;
-        delete headToRemove;   
-        this->size--;
-
-        if(this->head == nullptr)
-            this->tail = this->head;
-
-        return removedHeadValue; */
+        return frontValue;
     }
 
 
@@ -270,7 +229,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     template <typename Data>
     void List<Data>::InsertAtBack(Data&& data)
     {
-        Node* newTail = new Node(data);
+        Node* newTail = new Node(std::move(data));
 
         if(this->tail != nullptr)
             this->tail->next = newTail;
@@ -286,7 +245,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     void List<Data>::RemoveFromBack() noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile rimuovere l'elemento in coda...");
+            throw std::length_error("List is empty! It wasn't possible to remove the last element...");
 
         if(this->size == 1)
         {
@@ -296,9 +255,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
 
         Node* current = this->head;
         while(current->next->next != nullptr)
-        {
             current = current->next;
-        } 
 
         delete this->tail;
         this->tail = current;
@@ -310,29 +267,20 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     template <typename Data>
     Data List<Data>::BackNRemove() noexcept(false)
     {
-        if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile rimuovere l'elemento in coda...");
+        Data backValue;
 
-        if(this->size == 1)
+        try
         {
-            Data removedTailValue = this->FrontNRemove();
-            return removedTailValue;
+			backValue = this->Back();
+            this->RemoveFromBack();
         }
-
-        Node* current = this->head;
-        while(current->next->next != nullptr)
+        catch(const std::length_error& e)
         {
-            current = current->next;
-        } 
-
-        Data removedTailValue = tail->value;
-        delete this->tail;
+            std::cerr << "Exception occurred in List (BackNRemove): " << e.what() << '\n';
+            throw;
+        }
         
-        this->tail = current;
-        this->tail->next = nullptr;
-        this->size--;
-
-        return removedTailValue;
+        return backValue;
     }
 
 
@@ -340,7 +288,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
 	const Data& List<Data>::operator[](ulong index) const noexcept(false)
     {
         if(index >= this->size)
-            throw std::out_of_range("Indice non valido! Sei fuori dal range della dimensione della lista...");
+            throw std::out_of_range("Invalid index! You're out of the list size range...");
         
         Node* current = this->head;
         for(ulong i = 0; i < index; i++)
@@ -354,7 +302,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
 	const Data& List<Data>::Front() const noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile prelevare il primo elemento...");
+            throw std::length_error("List is empty! It wasn't possible to fetch the first element...");
 
         return this->head->value;
     }
@@ -364,7 +312,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
 	const Data& List<Data>::Back() const noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile prelevare l'ultimo elemento...");
+            throw std::length_error("List is empty! It wasn't possible to fetch the last element...");
 
         return this->tail->value;
     }
@@ -374,7 +322,7 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
 	Data& List<Data>::operator[](ulong index) noexcept(false)
     {
         if(index >= this->size)
-            throw std::out_of_range("Indice non valido! Sei fuori dal range della dimensione della lista...");
+            throw std::out_of_range("Invalid index! You're out of the list size range...");
         
         Node* current = this->head;
         for(ulong i = 0; i < index; i++)
@@ -388,17 +336,17 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
 	Data& List<Data>::Front() noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile prelevare il primo elemento...");
+            throw std::length_error("List is empty! It wasn't possible to fetch the first element...");
 
         return this->head->value;
     }
 
-    
+
     template<typename Data>
 	Data& List<Data>::Back() noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Lista vuota! Non è possibile prelevare l'ultimo elemento...");
+            throw std::length_error("List is empty! It wasn't possible to fetch the last element...");
 
         return this->tail->value;
     }
@@ -473,8 +421,8 @@ List<Data>& List<Data>::operator=(const List<Data>& other) {
     template <typename Data>
     void List<Data>::Clear() 
     {
-        Node *current = this->head;
-        Node *next = nullptr;
+        Node* current = this->head;
+        Node* next = nullptr;
         while (current != nullptr) 
         {
             next = current->next;
