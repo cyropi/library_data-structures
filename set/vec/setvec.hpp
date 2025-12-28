@@ -1,5 +1,4 @@
 
-
 #ifndef SETVEC_HPP
 #define SETVEC_HPP
 
@@ -7,39 +6,32 @@
 #include "../../vector/vector.hpp"
 
 
-
 namespace lasd 
 {
     template <typename Data>
-    class SetVec : virtual public Set<Data>,
-                   virtual public ResizableContainer
+    class SetVec : virtual public ResizableContainer,
+                   virtual public Set<Data>
     {
-        private:
-            // ...
-
         protected:
-            //using Container::size;
             Vector<Data> vector; 
             ulong head = 0;
             ulong tail = 0; 
-            ulong capacity = 0;
-            //static const ulong DEFAULT_SIZE = 10;
+            static const ulong DEFAULT_SIZE = 10;
 
 
         public:
             // Default constructor
-            SetVec() = default;
-            //SetVec(ulong);
+            SetVec();
 
 
             // Specific constructors
+            SetVec(const ulong);
             SetVec(const TraversableContainer<Data>&); // A set obtained from a TraversableContainer
             SetVec(MappableContainer<Data>&&); // A set obtained from a MappableContainer
 
 
             // Copy constructor
             SetVec(const SetVec<Data>&);
-
             // Move constructor
             SetVec(SetVec<Data>&&) noexcept;
 
@@ -50,7 +42,6 @@ namespace lasd
 
             // Copy assignment
             SetVec<Data>& operator=(const SetVec<Data>&);
-
             // Move assignment
             SetVec<Data>& operator=(SetVec<Data>&&) noexcept;
 
@@ -86,7 +77,8 @@ namespace lasd
 
 			// Specific member functions (inherited from LinearContainer)
 			const Data& operator[](ulong) const noexcept(false) override; // Override LinearContainer member (must throw std::out_of_range when out of range)
-
+	        const Data& Front() const noexcept(false) override; // Override LinearContainer member (must throw std::length_error when empty)
+			const Data& Back() const noexcept(false) override; // Override LinearContainer member (must throw std::length_error when empty)
 
 			// Specific member function (inherited from TestableContainer)
 			bool Exists(const Data&) const noexcept override; // Override TestableContainer member
@@ -99,25 +91,21 @@ namespace lasd
 			// Specific member function (inherited from ResizableContainer)
 			void Resize(ulong) override; // Override ResizableContainer member
 
-            void getInfo()
-            {
-                std::cout << "\n\nhead: " << this->head; 
-                std::cout << "\n\ntail: " << this->tail; 
-                std::cout << "\n\nsize: " << this->size; 
-                std::cout << "\n\ncapacity: " << this->Capacity(); 
-            }
-
 
         protected:
+            // Auxiliary functions, if necessary!
             virtual ulong Capacity() const noexcept;
-            virtual ulong BinarySearch(const Data&) const noexcept(false);
-            virtual ulong BinarySearchLowerBound(const Data&) const noexcept(false);
+            virtual ulong BinarySearch(const Data&) const;
+            virtual ulong BinarySearchLowerBound(const Data&) const;
             virtual ulong BinarySearchPredecessor(const Data&) const noexcept(false);
             virtual ulong BinarySearchSuccessor(const Data&) const noexcept(false);
-
-            // Auxiliary functions, if necessary!
     };
 }
+
+#include "setvec.cpp"
+
+#endif
+
 
 #include "setvec.cpp"
 
