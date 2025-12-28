@@ -1,41 +1,39 @@
 
+#include <stdexcept>
 
-namespace lasd 
+
+namespace lasd
 {
-/*     template <typename Data>
+    template <typename Data>
     SetVec<Data>::SetVec() : vector(DEFAULT_SIZE)
     {}
 
 
     template <typename Data>
-    SetVec<Data>::SetVec(ulong size) : vector(size)
-    {} */
+    SetVec<Data>::SetVec(const ulong size) : vector(size)
+    {} 
 
 
     template <typename Data>
     SetVec<Data>::SetVec(const TraversableContainer<Data>& traversableContainer) : vector(traversableContainer.Size())
     {
-        //this->vector = Vector<Data>(traversableContainer.Size());
         traversableContainer.Traverse([this](const Data& data) 
-                                        -> void{ std::cout << "\n\n\ndata:" << data; this->Insert(data); this->getInfo(); });
+                                        -> void{ this->Insert(data); });
     }
 
 
     template <typename Data>
     SetVec<Data>::SetVec(MappableContainer<Data>&& mappableContainer) : vector(mappableContainer.Size())
     {
-        //this->vector = Vector<Data>(mappableContainer.Size());
         mappableContainer.Map([this](Data& data) 
                                 -> void{ this->Insert(std::move(data)); });
     }
 
 
     template <typename Data>
-    SetVec<Data>::SetVec(const SetVec<Data>& setVec) : vector(setVec.Capacity())
+    SetVec<Data>::SetVec(const SetVec<Data>& setVec) : vector(setVec.size)
     {
-        //this->vector = Vector<Data>(setVec.Capacity());
-
-        this->size = setVec.Size();
+        this->size = setVec.size;
         this->head = 0;
         this->tail = this->size;
 
@@ -43,15 +41,6 @@ namespace lasd
             this->vector[i] = setVec[i];
     }
 
-/*     template <typename Data>
-    SetVec<Data>::SetVec(const SetVec<Data>& setVec)
-    : vector(setVec.vector) // Copia il Vector sottostante (che avrà la sua capacità)
-    {
-       this->size = setVec.size;     // Copia la dimensione logica
-      this->head = setVec.head;     // Copia l'head originale
-      this->tail = setVec.tail;      // Copia il tail originale
-    }
- */
 
     template <typename Data>
     SetVec<Data>::SetVec(SetVec<Data>&& setVec) noexcept 
@@ -92,33 +81,21 @@ namespace lasd
     }
 
 
-/*     // TODO: DA MODIFICARE
     template <typename Data>
     bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     {
-        return (this->size == setVec.size) && (this->vector == setVec.vector);
-    } */
+        if(this->size != setVec.size)
+            return false;
 
-template <typename Data>
-bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
-{
-    if (this->size != setVec.size) { // Se le dimensioni sono diverse, non possono essere uguali
-        return false;
-    }
-    // Se le dimensioni sono 0, entrambi sono vuoti e quindi uguali.
-    if (this->size == 0) {
+        for(ulong i = 0; i < this->size; ++i) 
+        {
+            if ((*this)[i] != setVec[i]) 
+                return false;
+        }
+
         return true;
     }
 
-    // Confronta elemento per elemento in ordine logico
-    // Utilizza l'operatore[] di SetVec che gestisce l'aritmetica circolare
-    for (ulong i = 0; i < this->size; ++i) {
-        if ((*this)[i] != setVec[i]) {
-            return false;
-        }
-    }
-    return true;
-}
 
     template <typename Data>
     bool SetVec<Data>::operator!=(const SetVec<Data>& setVec) const noexcept
@@ -131,7 +108,7 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     const Data& SetVec<Data>::Min() const noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Set Vec vuoto! Non è possibile prelevare il minimo...");
+            throw std::length_error("SetVec is empty! It wasn't possible to fetch the min element...");
 
         return (*this)[0];
     }
@@ -141,7 +118,7 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     void SetVec<Data>::RemoveMin() noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Set Vec vuoto! Non è possibile rimuovere il minimo...");
+            throw std::length_error("SetVec is empty! It wasn't possible to remove the min element...");
 
         this->head = (this->head + 1) % this->Capacity();
         this->size--;
@@ -151,13 +128,20 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     template <typename Data>
     Data SetVec<Data>::MinNRemove() noexcept(false)
     {
-        if(this->Empty())
-            throw std::length_error("Set Vec vuoto! Non è possibile rimuovere il minimo...");
+        Data minValue;
 
-        Data min = this->Min();
-        this->RemoveMin();
-
-        return min;
+        try
+        {
+			minValue = this->Min();
+            this->RemoveMin();
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (MinNRemove): " << e.what() << '\n';
+            throw;
+        }
+        
+        return minValue;
     }
 
 
@@ -165,7 +149,7 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     const Data& SetVec<Data>::Max() const noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Set Vec vuoto! Non è possibile prelevare il massimo...");
+            throw std::length_error("SetVec is empty! It wasn't possible to fetch the max element...");
 
         return (*this)[this->size-1];
     }
@@ -175,9 +159,9 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     void SetVec<Data>::RemoveMax() noexcept(false)
     {
         if(this->Empty())
-            throw std::length_error("Set Vec vuoto! Non è possibile rimuovere il masssimo...");
+            throw std::length_error("SetVec is empty! It wasn't possible to remove the max element...");
 
-        this->tail = (this->tail - 1) % this->Capacity();
+        this->tail = (this->tail - 1) % this->Capacity(); // TODO: cambiare in (this->tail + this->Capacity() - 1) % this->Capacity()
         this->size--;
     }
 
@@ -185,13 +169,20 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     template <typename Data>
     Data SetVec<Data>::MaxNRemove() noexcept(false)
     {
-        if(this->Empty())
-            throw std::length_error("Set Vec vuoto! Non è possibile rimuovere il massimo...");
+        Data maxValue;
 
-        Data max = this->Max();
-        this->RemoveMax();
-
-        return max;
+        try
+        {
+			maxValue = this->Max();
+            this->RemoveMax();
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (MaxNRemove): " << e.what() << '\n';
+            throw;
+        }
+        
+        return maxValue;
     }
 
 
@@ -201,7 +192,17 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
         if(data > this->Max())
             return this->Max();
 
-        ulong predecessor_index = this->BinarySearchPredecessor(data);
+        ulong predecessor_index;
+        try
+        {
+            predecessor_index = this->BinarySearchPredecessor(data);
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (Predecessor): " << e.what() << '\n';
+            throw;
+        }
+
         return (*this)[predecessor_index];
     }
 
@@ -209,17 +210,34 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     template <typename Data>
     void SetVec<Data>::RemovePredecessor(const Data& data) noexcept(false)
     {
-        const Data& predecessor = this->Predecessor(data);
-        this->Remove(predecessor);
+        try
+        {
+            const Data& predecessor = this->Predecessor(data);
+            this->Remove(predecessor);
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (RemovePredecessor): " << e.what() << '\n';
+            throw;
+        }
     }
 
 
     template <typename Data>
     Data SetVec<Data>::PredecessorNRemove(const Data& data) noexcept(false)
     {
-        Data predecessor = this->Predecessor(data);
-        this->Remove(predecessor);
-
+        Data predecessor;
+        try
+        {
+            predecessor = this->Predecessor(data);
+            this->Remove(predecessor);
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (PredecessorNRemove): " << e.what() << '\n';
+            throw;
+        }
+        
         return predecessor;
     }
 
@@ -230,7 +248,17 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
         if(data < this->Min())
             return this->Min();
 
-        ulong successor_index = this->BinarySearchSuccessor(data);
+        ulong successor_index;
+        try
+        {
+            successor_index = this->BinarySearchSuccessor(data);
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (Successor): " << e.what() << '\n';
+            throw;
+        }
+
         return (*this)[successor_index];
     }
 
@@ -238,16 +266,33 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
     template <typename Data>
     void SetVec<Data>::RemoveSuccessor(const Data& data) noexcept(false)
     {
-        const Data& successor = this->Successor(data);
-        this->Remove(successor);
+        try
+        {
+            const Data& successor = this->Successor(data);
+            this->Remove(successor);
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (RemoveSuccessor): " << e.what() << '\n';
+            throw;
+        }
     }
 
 
     template <typename Data>
     Data SetVec<Data>::SuccessorNRemove(const Data& data) noexcept(false)
     {
-        Data successor = this->Successor(data);
-        this->Remove(successor);
+        Data successor;
+        try
+        {
+            successor = this->Successor(data);
+            this->Remove(successor);
+        }
+        catch(const std::length_error& e)
+        {
+            std::cerr << "Exception occurred in SetVec (SuccessorNRemove): " << e.what() << '\n';
+            throw;
+        }
 
         return successor;
     }
@@ -267,9 +312,6 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
 
             return true;
         }
-
-        std::cout << "\n\nMIN: " << this->Min();
-        std::cout << "\n\nMAX: " << this->Max();
         
         if(data < this->Min())
         {
@@ -289,33 +331,26 @@ bool SetVec<Data>::operator==(const SetVec<Data>& setVec) const noexcept
             return true;
         } 
 
+
         ulong logical_index = this->BinarySearchLowerBound(data);
 
-        if(logical_index < this->Size() && (*this)[logical_index] == data)
+        if(logical_index < this->size && (*this)[logical_index] == data)
             return false;
 
 
         if(logical_index <= this->size / 2) 
         {
-            std::cout << "\n\nSONO IN SHIFT SX";
-
-            
-            //this->head = (this->head - 1 + this->Capacity()) % this->Capacity();
-
             // Shift left
-            for(ulong i = 0; i <= logical_index; i++)
+            for(ulong i = 0; i < logical_index; i++)
                 this->vector[(this->head + i - 1 + this->Capacity()) % this->Capacity()] = this->vector[(this->head + i) % this->Capacity()];
 
             this->head = (this->head - 1 + this->Capacity()) % this->Capacity();
-
         } 
         else 
         {
-                        std::cout << "\n\nSONO IN SHIFT DX";
-
-for(long i = static_cast<long>(this->size - 1); i >= static_cast<long>(logical_index); i--) {
-    this->vector[(this->head + i + 1) % this->Capacity()] = this->vector[(this->head + i) % this->Capacity()];
-}
+            // Shift right
+            for(long i = static_cast<long>(this->size - 1); i >= static_cast<long>(logical_index); i--) 
+                this->vector[(this->head + i + 1) % this->Capacity()] = this->vector[(this->head + i) % this->Capacity()];
 
             this->tail = (this->tail + 1) % this->Capacity();
         }
@@ -328,86 +363,87 @@ for(long i = static_cast<long>(this->size - 1); i >= static_cast<long>(logical_i
     }
 
 
-template <typename Data>
-bool SetVec<Data>::Insert(Data&& data)
-{
-    // 1. Gestione della capacità: Se il set è pieno, ridimensiona l'array sottostante.
-    //    Assicurati che Resize() gestisca correttamente la copia/move degli elementi
-    //    e la linearizzazione/aggiornamento di head e tail nel nuovo array.
-    if (this->size == this->Capacity()) {
-        this->Resize(this->size * 2 + 1);
-    }
+    template <typename Data>
+    bool SetVec<Data>::Insert(Data&& data)
+    {
+        if(this->size == this->Capacity())
+            this->Resize((this->size*2)+1);
 
-    // 2. Caso speciale: Inserimento in un SetVec vuoto.
-    //    Qui usiamo std::move per "spostare" 'data' nella posizione dell'array.
-    if (this->Empty()) {
-        this->vector[this->head] = std::move(data); // <--- Usiamo std::move qui
-        this->tail = (this->head + 1) % this->Capacity();
+        if(this->Empty()) 
+        {
+            this->vector[this->head] = std::move(data);
+            this->tail = (this->head + 1) % this->Capacity();
+            this->size++;
+
+            return true;
+        }
+        
+        if(data < this->Min())
+        {
+            this->head = (this->head - 1 + this->Capacity()) % this->Capacity();
+            this->vector[this->head] = std::move(data);
+            this->size++;
+
+            return true;
+        }
+
+        if(data > this->Max())
+        {
+            this->vector[this->tail] = std::move(data);
+            this->tail = (this->tail + 1) % this->Capacity();
+            this->size++;
+
+            return true;
+        } 
+
+
+        ulong logical_index = this->BinarySearchLowerBound(data);
+
+        if(logical_index < this->size && (*this)[logical_index] == data)
+            return false;
+
+
+        if(logical_index <= this->size / 2) 
+        {
+            // Shift left
+            for(ulong i = 0; i < logical_index; i++)
+                this->vector[(this->head + i - 1 + this->Capacity()) % this->Capacity()] = std::move(this->vector[(this->head + i) % this->Capacity()]);
+
+            this->head = (this->head - 1 + this->Capacity()) % this->Capacity();
+        } 
+        else 
+        {
+            // Shift right
+            for(long i = static_cast<long>(this->size - 1); i >= static_cast<long>(logical_index); i--) // TODO: eliminare cast a long
+                this->vector[(this->head + i + 1) % this->Capacity()] = std::move(this->vector[(this->head + i) % this->Capacity()]);
+
+            this->tail = (this->tail + 1) % this->Capacity();
+        }
+
+        ulong physical_index = (this->head + logical_index) % this->Capacity(); 
+        this->vector[physical_index] = std::move(data);
         this->size++;
+
         return true;
     }
-
-    // 3. Trova l'indice logico dove il nuovo elemento dovrebbe essere inserito.
-    //    BinarySearchLowerBound restituisce l'indice del primo elemento maggiore o uguale a 'data'.
-    //    NOTA: Qui 'data' è un rvalue, ma per il confronto deve essere trattato come lvalue
-    //    (o, se 'Data' ha un operatore di confronto per rvalue, può essere usato direttamente).
-    //    Nella maggior parte dei casi, il confronto non consuma l'oggetto.
-    ulong logical_index = this->BinarySearchLowerBound(data);
-
-    // 4. Gestione dei duplicati: Se SetVec non permette duplicati, verifica se l'elemento esiste già.
-    //    Anche qui, 'data' è trattato come lvalue per il confronto.
-    if (logical_index < this->Size() && (*this)[logical_index] == data) {
-        return false; // L'elemento esiste già nel set, non inserirlo.
-    }
-
-    // 5. Decide la direzione dello shift (sinistra o destra) per ottimizzare le prestazioni.
-    if (logical_index < this->size / 2) {
-        // Shift a sinistra: spostare gli elementi dall'inizio logico (head) fino
-        // a logical_index - 1, di una posizione indietro nell'array fisico.
-        // Gli spostamenti intermedi usano std::move.
-        for (ulong i = 0; i < logical_index; i++) {
-            this->vector[(this->head + i - 1 + this->Capacity()) % this->Capacity()] =
-                std::move(this->vector[(this->head + i) % this->Capacity()]); // <--- Usiamo std::move qui
-        }
-        this->head = (this->head - 1 + this->Capacity()) % this->Capacity();
-    } else {
-        // Shift a destra: spostare gli elementi da logical_index fino alla fine logica (tail)
-        // di una posizione in avanti nell'array fisico.
-        // Gli spostamenti intermedi usano std::move.
-        for (long i = static_cast<long>(this->size - 1); i >= static_cast<long>(logical_index); i--) {
-            this->vector[(this->head + i + 1) % this->Capacity()] =
-                std::move(this->vector[(this->head + i) % this->Capacity()]); // <--- Usiamo std::move qui
-        }
-        this->tail = (this->tail + 1) % this->Capacity();
-    }
-
-    // 6. Inserisci il nuovo elemento nella posizione fisica ora liberata.
-    //    Usiamo std::move per spostare 'data' nella sua posizione finale.
-    ulong physical_index = (this->head + logical_index) % this->Capacity();
-    this->vector[physical_index] = std::move(data); // <--- Usiamo std::move qui
-    
-    // 7. Aggiorna la dimensione del set.
-    this->size++;
-
-    return true;
-}
 
 
     template <typename Data>
 	bool SetVec<Data>::Remove(const Data& data)
     {
-        if(this->size == this->Capacity())
-            this->Resize(this->size*2);
+        if(this->size == this->Capacity()/2)
+            this->Resize(this->size);
 
         if(this->Empty() || data < this->Min() || data > this->Max())
             return false;
+
 
         ulong logical_index = this->BinarySearch(data);
         
         if(logical_index == this->size)
             return false;
 
-        if(logical_index < size / 2) 
+        if(logical_index <= size / 2) 
         {
             // Shift right
             for(ulong i = logical_index; i > 0; i--)
@@ -418,7 +454,7 @@ bool SetVec<Data>::Insert(Data&& data)
         else 
         {
             // Shift left
-            for(ulong i = logical_index; i < this->size; i++)
+            for(ulong i = logical_index; i < this->size-1; i++)
                 this->vector[(this->head + i) % this->Capacity()] = this->vector[(this->head + i + 1) % this->Capacity()];
 
             this->tail = (this->tail - 1 + this->Capacity()) % this->Capacity();
@@ -434,9 +470,29 @@ bool SetVec<Data>::Insert(Data&& data)
     const Data& SetVec<Data>::operator[](ulong index) const noexcept(false)
     {        
         if(index >= this->size)
-            throw std::out_of_range("Indice non valido! Sei fuori dal range della dimensione del Set Vec...");
+            throw std::out_of_range("Invalid index! You're out of the setVec size range...");
         
         return this->vector[(this->head + index) % this->Capacity()];
+    }
+
+
+    template <typename Data>
+	const Data& SetVec<Data>::Front() const noexcept(false)
+    {
+        if(this->Empty())
+            throw std::length_error("SetVec is empty! It wasn't possible to fetch the first element...");
+
+        return this->Min();
+    }
+
+
+    template <typename Data>
+	const Data& SetVec<Data>::Back() const noexcept(false)
+    {
+        if(this->Empty())
+            throw std::length_error("SetVec is empty! It wasn't possible to fetch the last element...");
+            
+        return this->Max();
     }
 
 
@@ -459,37 +515,26 @@ bool SetVec<Data>::Insert(Data&& data)
 
 
     template <typename Data>
-    void SetVec<Data>::Resize(ulong newCap) 
+    void SetVec<Data>::Resize(ulong newSize) 
     {
-        if (newCap < this->size)
-            newCap = this->size;
+        if(newSize == 0)
+        {
+            this->Clear();
+        }
+        else if(this->size != newSize)
+        {
+            Vector<Data> tmpVec = Vector<Data>(newSize);
 
-        Vector<Data> newVec(newCap);
+            ulong minSize = (this->size < newSize) ? this->size : newSize;
+            for(ulong i = 0; i < minSize; i++)
+                tmpVec[i] = std::move((*this)[i]); 
 
-        for (ulong i = 0; i < this->size; ++i)
-            newVec[i] = std::move((*this)[i]); // copia ordinata logica → fisica
-
-    std::swap(this->vector, newVec); // <--- Qui avviene lo scambio
-        this->head = 0;
-        this->tail = this->size;
+            std::swap(this->vector, tmpVec);
+            this->head = 0;
+            this->tail = this->size;
+        }
     }
 
-/* template <typename Data>
-void SetVec<Data>::Resize(ulong newCapacity) 
-{
-    Vector<Data> newvector = Vector<Data>(newCapacity);
-    ulong vectorToCopy = (this->size < newCapacity) ? this->size : newCapacity;
-    for (ulong i = 0; i < vectorToCopy; ++i) 
-    {
-        ulong srcIndex = (head + i) % capacity;
-        newvector[i] = std::move(vector[srcIndex]);
-    }
-    vector.Clear();
-    vector = newvector;
-    head = 0;
-    this->tail = this->size;
-    size = vectorToCopy;
-} */
 
     template <typename Data>
     ulong SetVec<Data>::Capacity() const noexcept
@@ -499,13 +544,13 @@ void SetVec<Data>::Resize(ulong newCapacity)
 
 
     template <typename Data>
-    ulong SetVec<Data>::BinarySearch(const Data& data) const noexcept(false)
+    ulong SetVec<Data>::BinarySearch(const Data& data) const
     {
         if(this->Empty()) 
             return this->size;
 
-        ulong start = 0;
-        ulong end = this->size - 1;
+        long start = 0;
+        long end = this->size - 1;
         
         while(start <= end)
         {
@@ -524,7 +569,7 @@ void SetVec<Data>::Resize(ulong newCapacity)
 
 
     template <typename Data>
-    ulong SetVec<Data>::BinarySearchLowerBound(const Data& data) const noexcept(false)
+    ulong SetVec<Data>::BinarySearchLowerBound(const Data& data) const 
     {
         ulong start = 0;
         ulong end = this->size;
@@ -604,3 +649,59 @@ void SetVec<Data>::Resize(ulong newCapacity)
         return successor_index;
     }
 }
+
+
+
+
+// TODO: migliorare Insert e Remove
+/*
+if (this->size == this->Capacity()) {
+    // Se size è 0 (ovvero setvec appena creato/vuoto), diventa DEFAULT_SIZE. Altrimenti raddoppia.
+    ulong newSize = (this->size == 0) ? DEFAULT_SIZE : this->size * 2;
+    this->Resize(newSize);
+}
+
+
+// Riduci solo se:
+// 1. Siamo sotto 1/4 (per lasciare spazio di crescita)
+// 2. E siamo sopra la dimensione minima (per non fare allocazioni minuscole)
+if (this->size <= this->Capacity() / 4 && this->Capacity() > DEFAULT_SIZE) {
+    // Dimezza, ma mai sotto DEFAULT_SIZE
+    ulong newSize = this->Capacity() / 2;
+    if (newSize < DEFAULT_SIZE) newSize = DEFAULT_SIZE;
+
+    this->Resize(newSize);
+}
+
+
+AGGIUNGERE funzioni ausiliari shift:
+
+template <typename Data>
+void SetVec<Data>::ShiftLeft(ulong index) {
+    // Spostiamo verso sinistra solo gli elementi PRIMA dell'indice
+    // Nota: head viene decrementata alla fine del processo o dal chiamante?
+    // Meglio farlo qui dentro per coerenza.
+
+    // 1. Sposto gli elementi
+    for(ulong i = 0; i < index; i++) {
+        this->vector[(this->head + i - 1 + this->Capacity()) % this->Capacity()] =
+            this->vector[(this->head + i) % this->Capacity()];
+    }
+    // 2. Aggiorno la Head
+    this->head = (this->head - 1 + this->Capacity()) % this->Capacity();
+}
+
+template <typename Data>
+void SetVec<Data>::ShiftRight(ulong index) {
+    // Spostiamo verso destra gli elementi DALL'indice in poi
+    for(long i = static_cast<long>(this->size - 1); i >= static_cast<long>(index); i--) {
+        this->vector[(this->head + i + 1) % this->Capacity()] =
+            this->vector[(this->head + i) % this->Capacity()];
+    }
+    // Aggiorno la Tail
+    this->tail = (this->tail + 1) % this->Capacity();
+}
+
+
+
+*/
