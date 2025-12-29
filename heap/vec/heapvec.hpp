@@ -54,8 +54,14 @@ namespace lasd
 
             // Specific member function (inherited from SortableLinearContainer)
             void Sort() override; // Override SortableLinearContainer member
-			const Data& operator[](ulong) const noexcept(false) override; // Override SortableLinearContainer member (must throw std::out_of_range when out of range)
-			Data& operator[](ulong) noexcept(false) override; // Override SortableLinearContainer member (must throw std::out_of_range when out of range)
+
+
+            // Specific member function (inherited from MutableLinearContainer)
+            Data& operator[](ulong) noexcept(false) override; // Override SortableLinearContainer member (must throw std::out_of_range when out of range)
+
+
+            // Specific member function (inherited from LinearContainer)
+            const Data& operator[](ulong) const noexcept(false) override; // Override LinearContainer member (must throw std::out_of_range when out of range)
 
 
 			// Specific member function (inherited from ClearableContainer)
