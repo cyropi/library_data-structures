@@ -1,8 +1,6 @@
 
-
 #ifndef PQ_HPP
 #define PQ_HPP
-
 
 #include "../container/linear.hpp"
 
@@ -10,16 +8,9 @@
 namespace lasd 
 {
     template <typename Data>
-    class PQ : virtual public LinearContainer<Data>,
-               virtual public ClearableContainer
+    class PQ : virtual public ClearableContainer,
+               virtual public LinearContainer<Data>
     {
-        // Must extend LinearContainer<Data>,
-        //             ClearableContainer
-
-        private:
-
-        protected:
-
         public:
             // Destructor
             virtual ~PQ() = default;
